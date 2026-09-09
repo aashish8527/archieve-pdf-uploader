@@ -17,7 +17,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.x"
 
       - name: Install Internet Archive CLI
         run: |
@@ -26,15 +26,17 @@ jobs:
 
       - name: Upload PDFs to Archive.org
         env:
-          IA_ACCESS_KEY_ID: ${{ secrets.IA_ACCESS_KEY }}
-          IA_SECRET_ACCESS_KEY: ${{ secrets.IA_SECRET_KEY }}
+          IA_ACCESS_KEY: ${{ secrets.IA_ACCESS_KEY }}
+          IA_SECRET_KEY: ${{ secrets.IA_SECRET_KEY }}
           IA_ITEM_ID: ${{ secrets.IA_ITEM_ID }}
-
         run: |
+          ia configure --username "$IA_ACCESS_KEY" --password "$IA_SECRET_KEY"
+
           find pdf -type f -name "*.pdf" -print0 | while IFS= read -r -d '' file
           do
             echo "Uploading: $file"
 
             ia upload "$IA_ITEM_ID" "$file" \
-              --metadata="mediatype:texts"
+              --metadata="mediatype:texts" \
+              --metadata="collection:opensource_media"
           done
